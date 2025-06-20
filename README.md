@@ -53,3 +53,11 @@ Pressing one of these keys will trigger the assigned action without clicking the
 On Linux systems the `keyboard` module may require elevated privileges to
 capture global events. If the hotkeys do not work, try running the application
 with `sudo` or as an administrator.
+
+## Custom programs
+
+Buttons can launch your own programs. Select a key in the GUI, choose
+**Run Program** in the action list and enter the command in the *Command*
+field. After clicking **Assign**, pressing the button (or its hotkey) will run
+the command via the system shell. For example, entering `firefox` will launch
+the Firefox browser.

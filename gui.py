@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from obs_client import OBSClient
 import os
 import keyboard
+import subprocess
 
 class KeyButton(tk.Canvas):
     def __init__(self, master, label):
@@ -49,6 +50,11 @@ class KeyButton(tk.Canvas):
     def trigger(self):
         if callable(self.action):
             self.action()
+        elif isinstance(self.action, str) and self.action:
+            try:
+                subprocess.Popen(self.action, shell=True)
+            except Exception as e:
+                print(f"Failed to run command '{self.action}': {e}")
         else:
             print(f"No action assigned to {self.label}")
 
@@ -131,12 +137,18 @@ class KeyboardGUI(tk.Tk):
             "Toggle Mic": self.obs.toggle_mic,
             "Scene 1": lambda: self.obs.set_scene("Scene 1"),
             "Scene 2": lambda: self.obs.set_scene("Scene 2"),
+            "Run Program": None,
         }
         self.actions = actions
 
         self.action_var = tk.StringVar()
         self.action_box = ttk.Combobox(sidebar, textvariable=self.action_var, values=list(actions.keys()), state="readonly")
         self.action_box.pack(pady=5)
+
+        tk.Label(sidebar, text="Command", fg="white", bg="#121212").pack(pady=(10,0))
+        self.command_var = tk.StringVar()
+        self.command_entry = tk.Entry(sidebar, textvariable=self.command_var, bg="#1e1e1e", fg="white", insertbackground="white")
+        self.command_entry.pack(pady=5, fill=tk.X)
 
         assign_btn = tk.Button(sidebar, text="Assign", command=self.assign_action, bg="#1e1e1e", fg="white", relief=tk.FLAT, activebackground="#333333")
         assign_btn.pack(pady=5)
@@ -154,7 +166,15 @@ class KeyboardGUI(tk.Tk):
         if not self.selected_key:
             return
         action_name = self.action_var.get()
-        if action_name:
+        if not action_name:
+            return
+        if action_name == "Run Program":
+            cmd = self.command_var.get().strip()
+            if cmd:
+                self.selected_key.assign(action_name, cmd)
+            else:
+                messagebox.showwarning("No Command", "Please enter a command to run.")
+        else:
             self.selected_key.assign(action_name, self.actions[action_name])
 
     def setup_hotkeys(self):
