@@ -67,10 +67,10 @@ the Firefox browser. To open the system default browser you can use
 
 ## OBS actions
 
-Alongside dedicated Start/Stop options, the action list now includes
-**Toggle Stream** and **Toggle Recording** which start or stop the corresponding
-OBS outputs on repeated presses. The **Toggle Filter** action allows selecting
-a source and filter from OBS and toggling it with a single key.
+The action list includes **Toggle Stream** and **Toggle Recording** which start
+or stop the corresponding OBS outputs on repeated presses. The **Toggle Filter**
+action allows selecting a source and filter from OBS and toggling it with a
+single key.
 
 ## Tray mode
 

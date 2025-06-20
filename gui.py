@@ -156,11 +156,7 @@ class KeyboardGUI(tk.Tk):
         tk.Label(sidebar, text="Action", fg="white", bg="#121212").pack(pady=5)
 
         actions = {
-            "Start Stream": self.obs.start_streaming,
-            "Stop Stream": self.obs.stop_streaming,
             "Toggle Stream": self.obs.toggle_streaming,
-            "Start Recording": self.obs.start_recording,
-            "Stop Recording": self.obs.stop_recording,
             "Toggle Recording": self.obs.toggle_recording,
             "Toggle Mic": self.obs.toggle_mic,
             "Scene 1": lambda: self.obs.set_scene("Scene 1"),
