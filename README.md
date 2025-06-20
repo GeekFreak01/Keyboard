@@ -64,6 +64,13 @@ the command via the system shell. For example, entering `firefox` will launch
 the Firefox browser. To open the system default browser you can use
 `python -m webbrowser` or on Linux `xdg-open https://example.com`.
 
+## OBS actions
+
+Alongside dedicated Start/Stop options, the action list now includes
+**Toggle Stream** and **Toggle Recording** which start or stop the corresponding
+OBS outputs on repeated presses. The **Toggle Filter** action allows selecting
+a source and filter from OBS and toggling it with a single key.
+
 ## Tray mode
 
 When the GUI window is minimized or closed, it hides and a small tray icon
