@@ -6,6 +6,7 @@ import keyboard
 import subprocess
 import pystray
 from PIL import Image, ImageDraw
+import json
 
 class KeyButton(tk.Canvas):
     def __init__(self, master, label):
@@ -68,6 +69,13 @@ class KeyboardGUI(tk.Tk):
         self.resizable(False, False)
         self.configure(bg="#121212")
 
+        self.config_file = "keyboard_config.json"
+        self.programs = {
+            "Firefox": "firefox",
+            "Calculator": "calc" if os.name == "nt" else "gnome-calculator",
+            "Notepad": "notepad" if os.name == "nt" else "gedit",
+        }
+
         self.protocol("WM_DELETE_WINDOW", self.on_exit)
         self.bind("<Unmap>", self.on_minimize)
 
@@ -98,13 +106,6 @@ class KeyboardGUI(tk.Tk):
                         "Connection Failed",
                         "Still unable to connect. Please review your settings."
                     )
-
-        # Program selector (for future expansion)
-        program_frame = tk.Frame(self, bg="#121212")
-        program_frame.pack(pady=10)
-        tk.Label(program_frame, text="Program:", fg="white", bg="#121212").pack(side=tk.LEFT)
-        self.program_var = tk.StringVar(value="OBS")
-        ttk.OptionMenu(program_frame, self.program_var, "OBS", "OBS").pack(side=tk.LEFT)
 
         content = tk.Frame(self, bg="#121212")
         content.pack(fill=tk.BOTH, expand=True)
@@ -149,18 +150,38 @@ class KeyboardGUI(tk.Tk):
         self.actions = actions
 
         self.action_var = tk.StringVar()
-        self.action_box = ttk.Combobox(sidebar, textvariable=self.action_var, values=list(actions.keys()), state="readonly")
+        self.action_box = ttk.Combobox(
+            sidebar, textvariable=self.action_var,
+            values=list(actions.keys()), state="readonly"
+        )
         self.action_box.pack(pady=5)
+        self.action_var.trace_add("write", self.update_action_ui)
+        self.program_label = tk.Label(sidebar, text="Program", fg="white", bg="#121212")
+        self.program_var = tk.StringVar()
+        self.program_box = ttk.Combobox(
+            sidebar, textvariable=self.program_var,
+            values=list(self.programs.keys()), state="readonly"
+        )
 
-        tk.Label(sidebar, text="Command", fg="white", bg="#121212").pack(pady=(10,0))
+        self.command_label = tk.Label(sidebar, text="Command", fg="white", bg="#121212")
         self.command_var = tk.StringVar()
-        self.command_entry = tk.Entry(sidebar, textvariable=self.command_var, bg="#1e1e1e", fg="white", insertbackground="white")
-        self.command_entry.pack(pady=5, fill=tk.X)
+        self.command_entry = tk.Entry(
+            sidebar, textvariable=self.command_var,
+            bg="#1e1e1e", fg="white", insertbackground="white"
+        )
+
+        # Initially hide program and command widgets until an action is chosen
+        self.program_label.pack_forget()
+        self.program_box.pack_forget()
+        self.command_label.pack_forget()
+        self.command_entry.pack_forget()
 
         assign_btn = tk.Button(sidebar, text="Assign", command=self.assign_action, bg="#1e1e1e", fg="white", relief=tk.FLAT, activebackground="#333333")
         assign_btn.pack(pady=5)
 
         self.selected_key = None
+
+        self.load_config()
 
         # Register global hotkeys for each button
         self.setup_hotkeys()
@@ -176,13 +197,62 @@ class KeyboardGUI(tk.Tk):
         if not action_name:
             return
         if action_name == "Run Program":
-            cmd = self.command_var.get().strip()
+            program_label = self.program_var.get().strip()
+            cmd = self.programs.get(program_label)
             if cmd:
                 self.selected_key.assign(action_name, cmd)
             else:
-                messagebox.showwarning("No Command", "Please enter a command to run.")
+                messagebox.showwarning("No Program", "Please choose a program to run.")
         else:
             self.selected_key.assign(action_name, self.actions[action_name])
+
+        self.save_config()
+
+    def update_action_ui(self, *args):
+        """Show program dropdown when 'Run Program' is selected."""
+        if self.action_var.get() == "Run Program":
+            self.command_label.pack_forget()
+            self.command_entry.pack_forget()
+            self.program_label.pack(pady=(10, 0))
+            self.program_box.pack(pady=5, fill=tk.X)
+        else:
+            self.program_label.pack_forget()
+            self.program_box.pack_forget()
+            self.command_label.pack_forget()
+            self.command_entry.pack_forget()
+
+    def save_config(self):
+        data = []
+        for btn in self.keys:
+            entry = {"action": btn.action_name}
+            if btn.action_name == "Run Program":
+                entry["command"] = btn.action
+            data.append(entry)
+        try:
+            with open(self.config_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            print(f"Failed to save config: {e}")
+
+    def load_config(self):
+        try:
+            with open(self.config_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            return
+        except Exception as e:
+            print(f"Failed to load config: {e}")
+            return
+
+        for btn, info in zip(self.keys, data):
+            action = info.get("action")
+            if not action:
+                continue
+            if action == "Run Program":
+                cmd = info.get("command")
+                btn.assign(action, cmd)
+            else:
+                btn.assign(action, self.actions.get(action))
 
     def setup_hotkeys(self):
         """Bind F13–F24 to the main 12 keys."""
