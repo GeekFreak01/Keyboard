@@ -21,11 +21,11 @@ class OBSClient:
         print("❌ Disconnected from OBS WebSocket")
     
     def set_scene(self, scene_name):
-        self.ws.call(requests.SetCurrentProgramScene(scene_name))
+        self.ws.call(requests.SetCurrentProgramScene(sceneName=scene_name))
         print(f"🎬 Switched to scene: {scene_name}")
     
     def toggle_mic(self):
-        self.ws.call(requests.ToggleInputMute('Mic/Aux'))
+        self.ws.call(requests.ToggleInputMute(inputName='Mic/Aux'))
         print("🎙️ Toggled Mic Mute")
     
     def start_recording(self):
@@ -50,7 +50,7 @@ class OBSClient:
         print("🔀 Streaming Toggled")
 
     def toggle_filter(self, source_name, filter_name):
-        self.ws.call(requests.ToggleSourceFilterEnabled(source_name, filter_name))
+        self.ws.call(requests.ToggleSourceFilterEnabled(sourceName=source_name, filterName=filter_name))
         print(f"✨ Toggled filter '{filter_name}' on {source_name}")
 
     def toggle_recording(self):
