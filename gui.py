@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from obs_client import OBSClient
 import os
 
@@ -44,12 +44,12 @@ class KeyboardGUI(tk.Tk):
                 "2. Verify the host and port settings.\n"
                 "3. Check the WebSocket password."
             )
-            retry = tk.messagebox.askretrycancel("OBS Connection Error", msg)
+            retry = messagebox.askretrycancel("OBS Connection Error", msg)
             if retry:
                 try:
                     self.obs.connect()
                 except Exception:
-                    tk.messagebox.showerror(
+                    messagebox.showerror(
                         "Connection Failed",
                         "Still unable to connect. Please review your settings."
                     )
