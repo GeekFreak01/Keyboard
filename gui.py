@@ -158,11 +158,11 @@ class KeyboardGUI(tk.Tk):
             self.selected_key.assign(action_name, self.actions[action_name])
 
     def setup_hotkeys(self):
-        """Bind F1–F15 to the corresponding buttons."""
-        for idx, key_btn in enumerate(self.keys):
-            hotkey = f"f{idx + 1}"
+        """Bind F13–F24 to the main 12 keys."""
+        for idx, key_btn in enumerate(self.keys[3:], start=13):
+            hotkey = f"f{idx}"
             keyboard.add_hotkey(hotkey, key_btn.trigger)
-        print("⌨️ Hotkeys registered: F1–F15")
+        print("⌨️ Hotkeys registered: F13–F24")
 
     def run(self):
         self.mainloop()
