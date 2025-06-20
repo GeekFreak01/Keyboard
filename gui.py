@@ -83,7 +83,7 @@ class KeyboardGUI(tk.Tk):
 
         self.tray_icon = self.create_tray_icon()
 
-        # Connect to OBS
+        # Initialize OBS client but don't require connection on startup
         self.obs = OBSClient(
             host=os.getenv("OBS_HOST", "localhost"),
             port=int(os.getenv("OBS_PORT", 4455)),
@@ -92,22 +92,7 @@ class KeyboardGUI(tk.Tk):
         try:
             self.obs.connect()
         except Exception as e:
-            print(f"OBS connection error: {e}")
-            msg = (
-                "Failed to connect to OBS.\n"
-                "1. Ensure OBS is running and the WebSocket server is enabled.\n"
-                "2. Verify the host and port settings.\n"
-                "3. Check the WebSocket password."
-            )
-            retry = messagebox.askretrycancel("OBS Connection Error", msg)
-            if retry:
-                try:
-                    self.obs.connect()
-                except Exception:
-                    messagebox.showerror(
-                        "Connection Failed",
-                        "Still unable to connect. Please review your settings."
-                    )
+            print(f"OBS connection error: {e}. Will retry when actions are used.")
 
         content = tk.Frame(self, bg="#121212")
         content.pack(fill=tk.BOTH, expand=True)
@@ -344,8 +329,8 @@ class KeyboardGUI(tk.Tk):
                 btn.assign(action, self.actions.get(action))
 
     def setup_hotkeys(self):
-        """Bind F13–F24 to the main 12 keys."""
-        for idx, key_btn in enumerate(self.keys[3:], start=13):
+        """Bind F13–F24 to the first 12 numbered keys."""
+        for idx, key_btn in enumerate(self.keys[3:15], start=13):
             hotkey = f"f{idx}"
             keyboard.add_hotkey(hotkey, key_btn.trigger)
         print("⌨️ Hotkeys registered: F13–F24")
