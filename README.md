@@ -14,6 +14,7 @@ The `requirements.txt` file lists:
 
 - `keyboard` – used to register global hotkeys.
 - `obs-websocket-py` – Python client for controlling OBS Studio via WebSocket.
+- `pystray` – adds a system tray icon on minimize/close.
 
 You will also need the OBS WebSocket plugin. OBS Studio 28 and later ships
 with it already enabled. For older versions, download the plugin from
@@ -61,3 +62,9 @@ Buttons can launch your own programs. Select a key in the GUI, choose
 field. After clicking **Assign**, pressing the button (or its hotkey) will run
 the command via the system shell. For example, entering `firefox` will launch
 the Firefox browser.
+
+## Tray mode
+
+When the GUI window is minimized or closed, it hides and a small tray icon
+appears. Right-click this icon to reopen the window or quit the application.
+Choosing **Quit** disconnects from OBS before exiting.
