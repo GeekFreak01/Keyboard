@@ -38,6 +38,21 @@ class KeyboardGUI(tk.Tk):
             self.obs.connect()
         except Exception as e:
             print(f"OBS connection error: {e}")
+            msg = (
+                "Failed to connect to OBS.\n"
+                "1. Ensure OBS is running and the WebSocket server is enabled.\n"
+                "2. Verify the host and port settings.\n"
+                "3. Check the WebSocket password."
+            )
+            retry = tk.messagebox.askretrycancel("OBS Connection Error", msg)
+            if retry:
+                try:
+                    self.obs.connect()
+                except Exception:
+                    tk.messagebox.showerror(
+                        "Connection Failed",
+                        "Still unable to connect. Please review your settings."
+                    )
 
         # Program selector (for future expansion)
         program_frame = tk.Frame(self)
