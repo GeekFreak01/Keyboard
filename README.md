@@ -46,11 +46,9 @@ OBS_HOST=192.168.1.2 OBS_PASSWORD=secret python main.py
 
 ## Hotkeys
 
-When running the GUI, global hotkeys for **F1** through **F15** are registered.
-Each function key corresponds to the buttons shown in the interface in order:
-`F1` → Enc 1, `F2` → Enc 2, `F3` → Enc 3, `F4` → Key 1 and so on.
-Pressing one of these keys will trigger the assigned action without clicking the
-GUI button.
+When running the GUI, global hotkeys for **F13** through **F24** are registered for the numbered keys.
+Each function key corresponds to the buttons shown in the interface in order: `F13` → Key 1, `F14` → Key 2 and so on.
+Pressing one of these keys will trigger the assigned action without clicking the GUI button.
 
 On Linux systems the `keyboard` module may require elevated privileges to
 capture global events. If the hotkeys do not work, try running the application
