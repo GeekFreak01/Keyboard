@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from obs_client import OBSClient
 import os
+import keyboard
 
 class KeyButton(tk.Canvas):
     def __init__(self, master, label):
@@ -142,6 +143,9 @@ class KeyboardGUI(tk.Tk):
 
         self.selected_key = None
 
+        # Register global hotkeys for each button
+        self.setup_hotkeys()
+
     def select_key(self, key_btn):
         self.selected_key = key_btn
         print(f"Selected {key_btn.label}")
@@ -152,6 +156,13 @@ class KeyboardGUI(tk.Tk):
         action_name = self.action_var.get()
         if action_name:
             self.selected_key.assign(action_name, self.actions[action_name])
+
+    def setup_hotkeys(self):
+        """Bind F1–F15 to the corresponding buttons."""
+        for idx, key_btn in enumerate(self.keys):
+            hotkey = f"f{idx + 1}"
+            keyboard.add_hotkey(hotkey, key_btn.trigger)
+        print("⌨️ Hotkeys registered: F1–F15")
 
     def run(self):
         self.mainloop()
