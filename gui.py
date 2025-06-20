@@ -68,7 +68,7 @@ class KeyboardGUI(tk.Tk):
         self.resizable(False, False)
         self.configure(bg="#121212")
 
-        self.protocol("WM_DELETE_WINDOW", self.hide_to_tray)
+        self.protocol("WM_DELETE_WINDOW", self.on_exit)
         self.bind("<Unmap>", self.on_minimize)
 
         self.tray_icon = self.create_tray_icon()
@@ -199,7 +199,7 @@ class KeyboardGUI(tk.Tk):
         draw.text((size // 3, size // 4), "K", fill="white")
         menu = pystray.Menu(
             pystray.MenuItem("Open", self.show_window),
-            pystray.MenuItem("Quit", self.on_quit)
+            pystray.MenuItem("Quit", self.on_exit)
         )
         return pystray.Icon("keyboard", image, "Keyboard", menu)
 
@@ -218,11 +218,21 @@ class KeyboardGUI(tk.Tk):
         if self.tray_icon.visible:
             self.tray_icon.stop()
 
-    def on_quit(self, icon=None, item=None):
+    def on_exit(self, icon=None, item=None):
+        """Disconnect from OBS if connected and close the application."""
+        if getattr(self, "obs", None):
+            try:
+                self.obs.disconnect()
+            except Exception as e:
+                print(f"OBS disconnect error: {e}")
         if self.tray_icon.visible:
             self.tray_icon.stop()
-        self.obs.disconnect()
         self.destroy()
+
+    # Backwards compatibility for older tray icons that may still reference
+    # on_quit
+    def on_quit(self, icon=None, item=None):
+        self.on_exit(icon, item)
 
     def run(self):
         self.mainloop()
