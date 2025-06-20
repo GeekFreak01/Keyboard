@@ -3,18 +3,47 @@ from tkinter import ttk, messagebox
 from obs_client import OBSClient
 import os
 
-class KeyButton(tk.Button):
+class KeyButton(tk.Canvas):
     def __init__(self, master, label):
-        super().__init__(master, text=label, width=10, height=3)
+        width, height = 80, 60
+        super().__init__(master, width=width, height=height, highlightthickness=0, bd=0, bg="#121212")
         self.label = label
         self.action_name = None
         self.action = None
-        self.config(command=self.trigger)
+
+        self.radius = 12
+        self.bg_color = "#1e1e1e"
+        self.hover_color = "#333333"
+        self.text_color = "white"
+
+        self.rect = self._rounded_rect(2, 2, width-2, height-2, self.radius, fill=self.bg_color, outline=self.bg_color)
+        self.text_item = self.create_text(width/2, height/2, text=label, fill=self.text_color)
+
+        self.bind("<ButtonRelease-1>", lambda e: self.trigger())
+        self.bind("<Enter>", lambda e: self.itemconfig(self.rect, fill=self.hover_color))
+        self.bind("<Leave>", lambda e: self.itemconfig(self.rect, fill=self.bg_color))
+
+    def _rounded_rect(self, x1, y1, x2, y2, r=25, **kwargs):
+        points = [
+            x1+r, y1,
+            x2-r, y1,
+            x2, y1,
+            x2, y1+r,
+            x2, y2-r,
+            x2, y2,
+            x2-r, y2,
+            x1+r, y2,
+            x1, y2,
+            x1, y2-r,
+            x1, y1+r,
+            x1, y1
+        ]
+        return self.create_polygon(points, smooth=True, **kwargs)
 
     def assign(self, action_name, action_func):
         self.action_name = action_name
         self.action = action_func
-        self.config(text=f"{self.label}\n{action_name}")
+        self.itemconfig(self.text_item, text=f"{self.label}\n{action_name}")
 
     def trigger(self):
         if callable(self.action):
@@ -27,6 +56,8 @@ class KeyboardGUI(tk.Tk):
         super().__init__()
         self.title("QMK Keyboard Controller")
         self.geometry("600x400")
+        self.resizable(False, False)
+        self.configure(bg="#121212")
 
         # Connect to OBS
         self.obs = OBSClient(
@@ -55,17 +86,17 @@ class KeyboardGUI(tk.Tk):
                     )
 
         # Program selector (for future expansion)
-        program_frame = tk.Frame(self)
+        program_frame = tk.Frame(self, bg="#121212")
         program_frame.pack(pady=10)
-        tk.Label(program_frame, text="Program:").pack(side=tk.LEFT)
+        tk.Label(program_frame, text="Program:", fg="white", bg="#121212").pack(side=tk.LEFT)
         self.program_var = tk.StringVar(value="OBS")
         ttk.OptionMenu(program_frame, self.program_var, "OBS", "OBS").pack(side=tk.LEFT)
 
-        content = tk.Frame(self)
+        content = tk.Frame(self, bg="#121212")
         content.pack(fill=tk.BOTH, expand=True)
 
         # Keyboard layout
-        self.keyboard_frame = tk.Frame(content)
+        self.keyboard_frame = tk.Frame(content, bg="#121212")
         self.keyboard_frame.pack(side=tk.LEFT, padx=10)
 
         self.keys = []
@@ -87,9 +118,9 @@ class KeyboardGUI(tk.Tk):
                 index += 1
 
         # Sidebar for actions
-        sidebar = tk.Frame(content)
+        sidebar = tk.Frame(content, bg="#121212")
         sidebar.pack(side=tk.RIGHT, fill=tk.Y, padx=10)
-        tk.Label(sidebar, text="Action").pack(pady=5)
+        tk.Label(sidebar, text="Action", fg="white", bg="#121212").pack(pady=5)
 
         actions = {
             "Start Stream": self.obs.start_streaming,
@@ -106,7 +137,7 @@ class KeyboardGUI(tk.Tk):
         self.action_box = ttk.Combobox(sidebar, textvariable=self.action_var, values=list(actions.keys()), state="readonly")
         self.action_box.pack(pady=5)
 
-        assign_btn = tk.Button(sidebar, text="Assign", command=self.assign_action)
+        assign_btn = tk.Button(sidebar, text="Assign", command=self.assign_action, bg="#1e1e1e", fg="white", relief=tk.FLAT, activebackground="#333333")
         assign_btn.pack(pady=5)
 
         self.selected_key = None
