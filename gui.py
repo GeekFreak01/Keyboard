@@ -4,6 +4,8 @@ from obs_client import OBSClient
 import os
 import keyboard
 import subprocess
+import pystray
+from PIL import Image, ImageDraw
 
 class KeyButton(tk.Canvas):
     def __init__(self, master, label):
@@ -65,6 +67,11 @@ class KeyboardGUI(tk.Tk):
         self.geometry("600x400")
         self.resizable(False, False)
         self.configure(bg="#121212")
+
+        self.protocol("WM_DELETE_WINDOW", self.hide_to_tray)
+        self.bind("<Unmap>", self.on_minimize)
+
+        self.tray_icon = self.create_tray_icon()
 
         # Connect to OBS
         self.obs = OBSClient(
@@ -183,6 +190,39 @@ class KeyboardGUI(tk.Tk):
             hotkey = f"f{idx}"
             keyboard.add_hotkey(hotkey, key_btn.trigger)
         print("⌨️ Hotkeys registered: F13–F24")
+
+    def create_tray_icon(self):
+        """Create the system tray icon."""
+        size = 64
+        image = Image.new("RGB", (size, size), "#1e1e1e")
+        draw = ImageDraw.Draw(image)
+        draw.text((size // 3, size // 4), "K", fill="white")
+        menu = pystray.Menu(
+            pystray.MenuItem("Open", self.show_window),
+            pystray.MenuItem("Quit", self.on_quit)
+        )
+        return pystray.Icon("keyboard", image, "Keyboard", menu)
+
+    def hide_to_tray(self, *args):
+        """Hide the window and show the tray icon."""
+        self.withdraw()
+        if not self.tray_icon.visible:
+            self.tray_icon.run_detached()
+
+    def on_minimize(self, event):
+        if self.state() == "iconic":
+            self.hide_to_tray()
+
+    def show_window(self, icon=None, item=None):
+        self.deiconify()
+        if self.tray_icon.visible:
+            self.tray_icon.stop()
+
+    def on_quit(self, icon=None, item=None):
+        if self.tray_icon.visible:
+            self.tray_icon.stop()
+        self.obs.disconnect()
+        self.destroy()
 
     def run(self):
         self.mainloop()

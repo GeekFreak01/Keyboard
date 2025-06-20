@@ -1,2 +1,3 @@
 keyboard
 obs-websocket-py
+pystray
