@@ -118,37 +118,23 @@ class KeyboardGUI(tk.Tk):
 
         self.keys = []
         self.encoders = []
-        # Encoders centered on middle row
+        # Encoders on a dedicated top row
         for i in range(3):
             btn = KeyButton(self.keyboard_frame, f"Enc {i+1}")
-            btn.grid(row=1, column=i+1, padx=5, pady=5)
+            btn.grid(row=0, column=i+1, padx=5, pady=5)
             btn.bind('<Button-1>', lambda e, b=btn: self.select_key(b))
             self.encoders.append(btn)
             self.keys.append(btn)
 
-        # 12 keys arranged 5x3 around encoders
+        # 15 keys in three rows below the encoders
         index = 1
-        # Top row
-        for c in range(5):
-            btn = KeyButton(self.keyboard_frame, f"Key {index}")
-            btn.grid(row=0, column=c, padx=5, pady=5)
-            btn.bind('<Button-1>', lambda e, b=btn: self.select_key(b))
-            self.keys.append(btn)
-            index += 1
-        # Middle row edges
-        for c in (0, 4):
-            btn = KeyButton(self.keyboard_frame, f"Key {index}")
-            btn.grid(row=1, column=c, padx=5, pady=5)
-            btn.bind('<Button-1>', lambda e, b=btn: self.select_key(b))
-            self.keys.append(btn)
-            index += 1
-        # Bottom row
-        for c in range(5):
-            btn = KeyButton(self.keyboard_frame, f"Key {index}")
-            btn.grid(row=2, column=c, padx=5, pady=5)
-            btn.bind('<Button-1>', lambda e, b=btn: self.select_key(b))
-            self.keys.append(btn)
-            index += 1
+        for r in range(1, 4):
+            for c in range(5):
+                btn = KeyButton(self.keyboard_frame, f"Key {index}")
+                btn.grid(row=r, column=c, padx=5, pady=5)
+                btn.bind('<Button-1>', lambda e, b=btn: self.select_key(b))
+                self.keys.append(btn)
+                index += 1
 
         # Sidebar for actions
         sidebar = tk.Frame(content, bg="#121212")
