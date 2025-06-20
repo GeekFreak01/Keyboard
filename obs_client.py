@@ -44,6 +44,28 @@ class OBSClient:
         self.ws.call(requests.StopStreaming())
         print("🛑 Streaming Stopped")
 
+    def toggle_streaming(self):
+        """Start or stop streaming depending on current state."""
+        self.ws.call(requests.ToggleStream())
+        print("🔀 Streaming Toggled")
+
     def toggle_filter(self, source_name, filter_name):
         self.ws.call(requests.ToggleSourceFilterEnabled(source_name, filter_name))
         print(f"✨ Toggled filter '{filter_name}' on {source_name}")
+
+    def toggle_recording(self):
+        """Start or stop recording depending on current state."""
+        self.ws.call(requests.ToggleRecord())
+        print("🔀 Recording Toggled")
+
+    def list_inputs(self):
+        """Return a list of available input names."""
+        resp = self.ws.call(requests.GetInputList())
+        inputs = resp.datain.get("inputs", [])
+        return [i.get("inputName") for i in inputs]
+
+    def list_filters(self, source_name):
+        """Return filter names for the given source."""
+        resp = self.ws.call(requests.GetSourceFilterList(sourceName=source_name))
+        filters = resp.datain.get("filters", [])
+        return [f.get("filterName") for f in filters]

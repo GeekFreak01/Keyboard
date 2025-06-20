@@ -15,6 +15,7 @@ class KeyButton(tk.Canvas):
         self.label = label
         self.action_name = None
         self.action = None
+        self.meta = None
 
         self.radius = 12
         self.bg_color = "#1e1e1e"
@@ -45,9 +46,10 @@ class KeyButton(tk.Canvas):
         ]
         return self.create_polygon(points, smooth=True, **kwargs)
 
-    def assign(self, action_name, action_func):
+    def assign(self, action_name, action_func, meta=None):
         self.action_name = action_name
         self.action = action_func
+        self.meta = meta
         self.itemconfig(self.text_item, text=f"{self.label}\n{action_name}")
 
     def trigger(self):
@@ -140,11 +142,14 @@ class KeyboardGUI(tk.Tk):
         actions = {
             "Start Stream": self.obs.start_streaming,
             "Stop Stream": self.obs.stop_streaming,
+            "Toggle Stream": self.obs.toggle_streaming,
             "Start Recording": self.obs.start_recording,
             "Stop Recording": self.obs.stop_recording,
+            "Toggle Recording": self.obs.toggle_recording,
             "Toggle Mic": self.obs.toggle_mic,
             "Scene 1": lambda: self.obs.set_scene("Scene 1"),
             "Scene 2": lambda: self.obs.set_scene("Scene 2"),
+            "Toggle Filter": None,
             "Run Program": None,
         }
         self.actions = actions
@@ -170,11 +175,24 @@ class KeyboardGUI(tk.Tk):
             bg="#1e1e1e", fg="white", insertbackground="white"
         )
 
+        self.source_label = tk.Label(sidebar, text="Source", fg="white", bg="#121212")
+        self.source_var = tk.StringVar()
+        self.source_box = ttk.Combobox(sidebar, textvariable=self.source_var, state="readonly")
+        self.source_var.trace_add("write", self.update_filter_options)
+
+        self.filter_label = tk.Label(sidebar, text="Filter", fg="white", bg="#121212")
+        self.filter_var = tk.StringVar()
+        self.filter_box = ttk.Combobox(sidebar, textvariable=self.filter_var, state="readonly")
+
         # Initially hide program and command widgets until an action is chosen
         self.program_label.pack_forget()
         self.program_box.pack_forget()
         self.command_label.pack_forget()
         self.command_entry.pack_forget()
+        self.source_label.pack_forget()
+        self.source_box.pack_forget()
+        self.filter_label.pack_forget()
+        self.filter_box.pack_forget()
 
         assign_btn = tk.Button(sidebar, text="Assign", command=self.assign_action, bg="#1e1e1e", fg="white", relief=tk.FLAT, activebackground="#333333")
         assign_btn.pack(pady=5)
@@ -210,23 +228,81 @@ class KeyboardGUI(tk.Tk):
                         "No Program",
                         "Please choose a program or enter a command to run."
                     )
+        elif action_name == "Toggle Filter":
+            source = self.source_var.get().strip()
+            flt = self.filter_var.get().strip()
+            if source and flt:
+                func = lambda s=source, f=flt: self.obs.toggle_filter(s, f)
+                self.selected_key.assign(action_name, func, {"source": source, "filter": flt})
+            else:
+                messagebox.showwarning(
+                    "Missing Info",
+                    "Please select both a source and filter."
+                )
+                return
         else:
             self.selected_key.assign(action_name, self.actions[action_name])
 
         self.save_config()
 
     def update_action_ui(self, *args):
-        """Show program dropdown and command entry when 'Run Program' is selected."""
-        if self.action_var.get() == "Run Program":
+        """Adjust input widgets based on selected action."""
+        action = self.action_var.get()
+        if action == "Run Program":
             self.program_label.pack(pady=(10, 0))
             self.program_box.pack(pady=5, fill=tk.X)
             self.command_label.pack(pady=(10, 0))
             self.command_entry.pack(pady=5, fill=tk.X)
+            self.source_label.pack_forget()
+            self.source_box.pack_forget()
+            self.filter_label.pack_forget()
+            self.filter_box.pack_forget()
+        elif action == "Toggle Filter":
+            self.program_label.pack_forget()
+            self.program_box.pack_forget()
+            self.command_label.pack_forget()
+            self.command_entry.pack_forget()
+            self.populate_sources()
+            self.source_label.pack(pady=(10, 0))
+            self.source_box.pack(pady=5, fill=tk.X)
+            self.filter_label.pack(pady=(10, 0))
+            self.filter_box.pack(pady=5, fill=tk.X)
         else:
             self.program_label.pack_forget()
             self.program_box.pack_forget()
             self.command_label.pack_forget()
             self.command_entry.pack_forget()
+            self.source_label.pack_forget()
+            self.source_box.pack_forget()
+            self.filter_label.pack_forget()
+            self.filter_box.pack_forget()
+
+    def populate_sources(self):
+        """Load available OBS sources into the combobox."""
+        try:
+            sources = self.obs.list_inputs()
+        except Exception as e:
+            print(f"Failed to get sources: {e}")
+            sources = []
+        self.source_box["values"] = sources
+        self.source_var.set("")
+        self.filter_box["values"] = []
+        self.filter_var.set("")
+
+    def update_filter_options(self, *args):
+        source = self.source_var.get()
+        if not source:
+            self.filter_box["values"] = []
+            self.filter_var.set("")
+            return
+        try:
+            filters = self.obs.list_filters(source)
+        except Exception as e:
+            print(f"Failed to get filters for {source}: {e}")
+            filters = []
+        self.filter_box["values"] = filters
+        if filters:
+            self.filter_var.set(filters[0])
 
     def save_config(self):
         data = []
@@ -234,6 +310,9 @@ class KeyboardGUI(tk.Tk):
             entry = {"action": btn.action_name}
             if btn.action_name == "Run Program":
                 entry["command"] = btn.action
+            elif btn.action_name == "Toggle Filter" and btn.meta:
+                entry["source"] = btn.meta.get("source")
+                entry["filter"] = btn.meta.get("filter")
             data.append(entry)
         try:
             with open(self.config_file, "w", encoding="utf-8") as f:
@@ -258,6 +337,11 @@ class KeyboardGUI(tk.Tk):
             if action == "Run Program":
                 cmd = info.get("command")
                 btn.assign(action, cmd)
+            elif action == "Toggle Filter":
+                source = info.get("source")
+                flt = info.get("filter")
+                func = lambda s=source, f=flt: self.obs.toggle_filter(s, f)
+                btn.assign(action, func, {"source": source, "filter": flt})
             else:
                 btn.assign(action, self.actions.get(action))
 
