@@ -67,7 +67,7 @@ class KeyboardGUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("QMK Keyboard Controller")
-        self.geometry("600x400")
+        self.geometry("700x400")
         self.resizable(False, False)
         self.configure(bg="#121212")
 
@@ -117,22 +117,38 @@ class KeyboardGUI(tk.Tk):
         self.keyboard_frame.pack(side=tk.LEFT, padx=10)
 
         self.keys = []
-        # Encoders on top row
+        self.encoders = []
+        # Encoders centered on middle row
         for i in range(3):
             btn = KeyButton(self.keyboard_frame, f"Enc {i+1}")
-            btn.grid(row=0, column=i, padx=5, pady=5)
+            btn.grid(row=1, column=i+1, padx=5, pady=5)
             btn.bind('<Button-1>', lambda e, b=btn: self.select_key(b))
+            self.encoders.append(btn)
             self.keys.append(btn)
 
-        # 12 keys (3x4 grid)
+        # 12 keys arranged 5x3 around encoders
         index = 1
-        for r in range(1,5):
-            for c in range(3):
-                btn = KeyButton(self.keyboard_frame, f"Key {index}")
-                btn.grid(row=r, column=c, padx=5, pady=5)
-                btn.bind('<Button-1>', lambda e, b=btn: self.select_key(b))
-                self.keys.append(btn)
-                index += 1
+        # Top row
+        for c in range(5):
+            btn = KeyButton(self.keyboard_frame, f"Key {index}")
+            btn.grid(row=0, column=c, padx=5, pady=5)
+            btn.bind('<Button-1>', lambda e, b=btn: self.select_key(b))
+            self.keys.append(btn)
+            index += 1
+        # Middle row edges
+        for c in (0, 4):
+            btn = KeyButton(self.keyboard_frame, f"Key {index}")
+            btn.grid(row=1, column=c, padx=5, pady=5)
+            btn.bind('<Button-1>', lambda e, b=btn: self.select_key(b))
+            self.keys.append(btn)
+            index += 1
+        # Bottom row
+        for c in range(5):
+            btn = KeyButton(self.keyboard_frame, f"Key {index}")
+            btn.grid(row=2, column=c, padx=5, pady=5)
+            btn.bind('<Button-1>', lambda e, b=btn: self.select_key(b))
+            self.keys.append(btn)
+            index += 1
 
         # Sidebar for actions
         sidebar = tk.Frame(content, bg="#121212")
