@@ -24,7 +24,19 @@ class OBSClient:
     def start_recording(self):
         self.ws.call(requests.StartRecord())
         print("⏺️ Recording Started")
-    
+
     def stop_recording(self):
         self.ws.call(requests.StopRecord())
         print("⏹️ Recording Stopped")
+
+    def start_streaming(self):
+        self.ws.call(requests.StartStreaming())
+        print("📡 Streaming Started")
+
+    def stop_streaming(self):
+        self.ws.call(requests.StopStreaming())
+        print("🛑 Streaming Stopped")
+
+    def toggle_filter(self, source_name, filter_name):
+        self.ws.call(requests.ToggleSourceFilterEnabled(source_name, filter_name))
+        print(f"✨ Toggled filter '{filter_name}' on {source_name}")
