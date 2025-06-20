@@ -1,8 +1,15 @@
 # obs_client.py
 from obswebsocket import obsws, requests
+import os
 
 class OBSClient:
-    def __init__(self, host='localhost', port=4455, password=''):
+    def __init__(self, host=None, port=None, password=None):
+        host = host if host is not None else os.getenv("OBS_HOST", "localhost")
+        env_port = os.getenv("OBS_PORT")
+        if port is None:
+            port = int(env_port) if env_port is not None else 4455
+        password = password if password is not None else os.getenv("OBS_PASSWORD", "")
+
         self.ws = obsws(host, port, password)
     
     def connect(self):
