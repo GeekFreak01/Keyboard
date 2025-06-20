@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from obs_client import OBSClient
+import os
 
 class KeyButton(tk.Button):
     def __init__(self, master, label):
@@ -28,7 +29,11 @@ class KeyboardGUI(tk.Tk):
         self.geometry("600x400")
 
         # Connect to OBS
-        self.obs = OBSClient(host='localhost', port=4455, password='your_password')
+        self.obs = OBSClient(
+            host=os.getenv("OBS_HOST", "localhost"),
+            port=int(os.getenv("OBS_PORT", 4455)),
+            password=os.getenv("OBS_PASSWORD", "your_password")
+        )
         try:
             self.obs.connect()
         except Exception as e:
