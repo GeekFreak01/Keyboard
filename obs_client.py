@@ -50,8 +50,22 @@ class OBSClient:
         print("🔀 Streaming Toggled")
 
     def toggle_filter(self, source_name, filter_name):
-        self.ws.call(requests.ToggleSourceFilterEnabled(sourceName=source_name, filterName=filter_name))
-        print(f"✨ Toggled filter '{filter_name}' on {source_name}")
+        # Retrieve current filter state
+        resp = self.ws.call(requests.GetSourceFilter(sourceName=source_name, filterName=filter_name))
+        current_state = resp.datain.get("filterEnabled")
+
+        # Toggle the filter state
+        resp = self.ws.call(
+            requests.SetSourceFilterEnabled(
+                sourceName=source_name, filterName=filter_name,
+                filterEnabled=not current_state
+            )
+        )
+
+        if resp.status:
+            print(f"✨ Toggled filter '{filter_name}' on {source_name}")
+        else:
+            print(f"❌ Failed to toggle filter '{filter_name}' on {source_name}")
 
     def toggle_recording(self):
         """Start or stop recording depending on current state."""
