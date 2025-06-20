@@ -2,6 +2,24 @@
 
 This small project provides a Tkinter GUI and helper scripts to control OBS via the WebSocket interface.
 
+## Requirements
+
+Install the Python dependencies with:
+
+```bash
+pip install -r requirements.txt
+```
+
+The `requirements.txt` file lists:
+
+- `keyboard` – used to register global hotkeys.
+- `obs-websocket-py` – Python client for controlling OBS Studio via WebSocket.
+
+You will also need the OBS WebSocket plugin. OBS Studio 28 and later ships
+with it already enabled. For older versions, download the plugin from
+[the obs-websocket releases page](https://github.com/obsproject/obs-websocket/releases)
+and install it. Once installed, enable the server from **Tools → WebSocket Server Settings** in OBS.
+
 ## Environment variables
 
 The OBS connection settings can be configured with the following variables:
@@ -11,3 +29,17 @@ The OBS connection settings can be configured with the following variables:
 - `OBS_PASSWORD` – password for the WebSocket server (defaults to an empty string or the value used in the GUI).
 
 When these variables are not set, the original hard coded defaults are used.
+
+## Usage
+
+Start the GUI controller with:
+
+```bash
+python main.py
+```
+
+The application will connect to OBS using the environment variables above. For example:
+
+```bash
+OBS_HOST=192.168.1.2 OBS_PASSWORD=secret python main.py
+```
