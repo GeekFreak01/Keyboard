@@ -197,24 +197,31 @@ class KeyboardGUI(tk.Tk):
         if not action_name:
             return
         if action_name == "Run Program":
-            program_label = self.program_var.get().strip()
-            cmd = self.programs.get(program_label)
-            if cmd:
-                self.selected_key.assign(action_name, cmd)
+            cmd_text = self.command_var.get().strip()
+            if cmd_text:
+                self.selected_key.assign(action_name, cmd_text)
             else:
-                messagebox.showwarning("No Program", "Please choose a program to run.")
+                program_label = self.program_var.get().strip()
+                cmd = self.programs.get(program_label)
+                if cmd:
+                    self.selected_key.assign(action_name, cmd)
+                else:
+                    messagebox.showwarning(
+                        "No Program",
+                        "Please choose a program or enter a command to run."
+                    )
         else:
             self.selected_key.assign(action_name, self.actions[action_name])
 
         self.save_config()
 
     def update_action_ui(self, *args):
-        """Show program dropdown when 'Run Program' is selected."""
+        """Show program dropdown and command entry when 'Run Program' is selected."""
         if self.action_var.get() == "Run Program":
-            self.command_label.pack_forget()
-            self.command_entry.pack_forget()
             self.program_label.pack(pady=(10, 0))
             self.program_box.pack(pady=5, fill=tk.X)
+            self.command_label.pack(pady=(10, 0))
+            self.command_entry.pack(pady=5, fill=tk.X)
         else:
             self.program_label.pack_forget()
             self.program_box.pack_forget()
