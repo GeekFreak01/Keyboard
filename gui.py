@@ -71,6 +71,37 @@ class KeyboardGUI(tk.Tk):
         self.resizable(False, False)
         self.configure(bg="#121212")
 
+        self.overrideredirect(True)
+        self._is_maximized = False
+        self._normal_geometry = None
+
+        self.title_bar = tk.Frame(self, bg="#1e1e1e")
+        self.title_bar.pack(fill=tk.X, side=tk.TOP)
+
+        btn_cfg = {
+            "bg": "#1e1e1e",
+            "fg": "white",
+            "relief": tk.FLAT,
+            "activebackground": "#333333",
+            "width": 3,
+        }
+        self.min_button = tk.Button(
+            self.title_bar, text="_", command=self.iconify, **btn_cfg
+        )
+        self.max_button = tk.Button(
+            self.title_bar, text="□", command=self.toggle_maximize, **btn_cfg
+        )
+        self.close_button = tk.Button(
+            self.title_bar, text="×", command=self.on_exit, **btn_cfg
+        )
+        for btn in (self.min_button, self.max_button, self.close_button):
+            btn.pack(side=tk.RIGHT, padx=2, pady=2)
+            btn.bind("<Enter>", lambda e, b=btn: b.configure(bg="#333333"))
+            btn.bind("<Leave>", lambda e, b=btn: b.configure(bg="#1e1e1e"))
+
+        self.title_bar.bind("<ButtonPress-1>", self.start_move)
+        self.title_bar.bind("<B1-Motion>", self.do_move)
+
         self.config_file = "keyboard_config.json"
         self.programs = {
             "Firefox": "firefox",
@@ -352,6 +383,27 @@ class KeyboardGUI(tk.Tk):
         self.withdraw()
         if not self.tray_icon.visible:
             self.tray_icon.run_detached()
+
+    def start_move(self, event):
+        self._drag_offset_x = event.x
+        self._drag_offset_y = event.y
+
+    def do_move(self, event):
+        x = event.x_root - self._drag_offset_x
+        y = event.y_root - self._drag_offset_y
+        self.geometry(f"+{x}+{y}")
+
+    def toggle_maximize(self):
+        if not self._is_maximized:
+            self._normal_geometry = self.geometry()
+            w = self.winfo_screenwidth()
+            h = self.winfo_screenheight()
+            self.geometry(f"{w}x{h}+0+0")
+            self._is_maximized = True
+        else:
+            if self._normal_geometry:
+                self.geometry(self._normal_geometry)
+            self._is_maximized = False
 
     def on_minimize(self, event):
         if self.state() == "iconic":
