@@ -106,7 +106,7 @@ class KeyboardGUI(tk.Tk):
             "width": 3,
         }
         self.min_button = tk.Button(
-            self.title_bar, text="_", command=self.iconify, **btn_cfg
+            self.title_bar, text="_", command=self.hide_to_tray, **btn_cfg
         )
         self.max_button = tk.Button(
             self.title_bar, text="□", command=self.toggle_maximize, **btn_cfg
