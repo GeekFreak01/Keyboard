@@ -88,3 +88,10 @@ single key.
 When the GUI window is minimized or closed, it hides and a small tray icon
 appears. Right-click this icon to reopen the window or quit the application.
 Choosing **Quit** disconnects from OBS before exiting.
+
+## Customization
+
+The application uses a custom title bar with its own window controls. Buttons for
+minimize, maximize and close sit at the top right. Hovering over them highlights
+the background. Drag the title bar to move the window. Maximizing toggles between
+full screen and the previous size.
