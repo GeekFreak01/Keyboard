@@ -94,7 +94,8 @@ class KeyboardGUI(tk.Tk):
         self.close_button = tk.Button(
             self.title_bar, text="×", command=self.on_exit, **btn_cfg
         )
-        for btn in (self.min_button, self.max_button, self.close_button):
+        # Pack close first so buttons appear as [minimize, maximize, close]
+        for btn in (self.close_button, self.max_button, self.min_button):
             btn.pack(side=tk.RIGHT, padx=2, pady=2)
             btn.bind("<Enter>", lambda e, b=btn: b.configure(bg="#333333"))
             btn.bind("<Leave>", lambda e, b=btn: b.configure(bg="#1e1e1e"))
