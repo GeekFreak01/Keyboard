@@ -1,6 +1,6 @@
 # Keyboard OBS Controller
 
-This small project provides a Tkinter GUI and helper scripts to control OBS via the WebSocket interface.
+This small project provides a Tkinter GUI and helper scripts to control OBS via the WebSocket interface. A minimal Go rewrite is available under the `golang` directory.
 
 ## Requirements
 
@@ -43,6 +43,12 @@ The application will connect to OBS using the environment variables above. For e
 
 ```bash
 OBS_HOST=192.168.1.2 OBS_PASSWORD=secret python main.py
+```
+
+The Go version can be built from the `golang` directory:
+
+```bash
+cd golang && go build
 ```
 
 ## Hotkeys
