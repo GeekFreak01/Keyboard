@@ -51,6 +51,11 @@ The Go version can be built from the `golang` directory:
 cd golang && go build
 ```
 
+Fyne relies on the `go-gl` OpenGL bindings which use CGO. Building the Go
+version therefore requires a working C compiler, such as GCC on Linux or
+MinGW-w64 on Windows. Make sure `CGO_ENABLED=1` is set when running `go build`
+or `go run`.
+
 ## Hotkeys
 
 The interface now shows fifteen keys in a 5×3 grid with three encoder controls positioned on a row above the keys.
