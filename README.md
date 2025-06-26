@@ -86,8 +86,9 @@ single key.
 ## Tray mode
 
 When the GUI window is minimized or closed, it hides and a small tray icon
-appears. Right-click this icon to reopen the window or quit the application.
-Choosing **Quit** disconnects from OBS before exiting.
+appears. Double-click the icon to restore the window. You can also
+right-click it to access a menu with **Open** and **Quit** actions. Choosing
+**Quit** disconnects from OBS before exiting.
 
 ## Customization
 

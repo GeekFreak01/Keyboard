@@ -7,6 +7,7 @@ import subprocess
 import pystray
 from PIL import Image, ImageDraw
 import json
+import time
 
 class KeyButton(tk.Canvas):
     def __init__(self, master, label):
@@ -63,6 +64,22 @@ class KeyButton(tk.Canvas):
         else:
             print(f"No action assigned to {self.label}")
 
+
+class DoubleClickIcon(pystray.Icon):
+    """System tray icon that triggers a callback on double click."""
+
+    def __init__(self, *args, on_double_click=None, **kwargs):
+        self._on_double_click = on_double_click
+        super().__init__(*args, **kwargs)
+        self._last_click = 0
+
+    def __call__(self):
+        now = time.time()
+        if now - self._last_click < 0.5:
+            if callable(self._on_double_click):
+                self._on_double_click()
+        self._last_click = now
+
 class KeyboardGUI(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -74,6 +91,9 @@ class KeyboardGUI(tk.Tk):
         self.overrideredirect(True)
         self._is_maximized = False
         self._normal_geometry = None
+
+        # Ensure the window appears in the taskbar on Windows
+        self.after(10, self._force_taskbar_icon)
 
         self.title_bar = tk.Frame(self, bg="#1e1e1e")
         self.title_bar.pack(fill=tk.X, side=tk.TOP)
@@ -374,16 +394,25 @@ class KeyboardGUI(tk.Tk):
         draw = ImageDraw.Draw(image)
         draw.text((size // 3, size // 4), "K", fill="white")
         menu = pystray.Menu(
-            pystray.MenuItem("Open", self.show_window),
+            pystray.MenuItem("Open", self.show_window, default=True),
             pystray.MenuItem("Quit", self.on_exit)
         )
-        return pystray.Icon("keyboard", image, "Keyboard", menu)
+        return DoubleClickIcon(
+            "keyboard", image, "Keyboard", menu,
+            on_double_click=self.show_window
+        )
 
     def hide_to_tray(self, *args):
         """Hide the window and show the tray icon."""
         self.withdraw()
         if not self.tray_icon.visible:
             self.tray_icon.run_detached()
+
+    def _force_taskbar_icon(self):
+        """Force appearance in the Windows taskbar for borderless window."""
+        if os.name == "nt":
+            self.wm_attributes("-topmost", True)
+            self.wm_attributes("-topmost", False)
 
     def start_move(self, event):
         self._drag_offset_x = event.x
